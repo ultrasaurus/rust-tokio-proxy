@@ -6,6 +6,8 @@ extern crate pretty_env_logger;
 #[macro_use] extern crate log;
 
 // type Reader = AsyncRead + Send + Unpin;
+// `type` is for concrete types with an implementation
+// Trait defines an abstract type
 
 trait AsyncReader: AsyncRead + Send + Unpin { } 
 impl<T: AsyncRead + Send + Unpin> AsyncReader for T {}
