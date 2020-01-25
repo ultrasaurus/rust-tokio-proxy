@@ -15,8 +15,7 @@ impl<T: AsyncRead + Send + Unpin> AsyncReader for T {}
 //     R: AsyncRead + Send + Unpin,
 
 async fn read_some<R>(mut reader: R) -> Result<(), std::io::Error>
-where
-    R: AsyncReader,
+where R: AsyncReader  
 {
   let mut buf = [0; 2];
   let n = match reader.read(&mut buf).await {

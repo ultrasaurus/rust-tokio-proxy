@@ -10,8 +10,17 @@ use tokio::prelude::*;
 extern crate pretty_env_logger;
 #[macro_use] extern crate log;
 
-async fn pipe<'a, Reader: AsyncRead + Send + Unpin, Writer: AsyncWrite + Send + Unpin>
-(label: &str, mut reader: Reader, mut writer:  Writer) -> Result<(), Box<dyn Error + Send + Sync + 'static>>
+trait AsyncReader: AsyncRead + Send + Unpin { } 
+impl<T: AsyncRead + Send + Unpin> AsyncReader for T {}
+
+trait AsyncWriter: AsyncWrite + Send + Unpin { } 
+impl<T: AsyncWrite + Send + Unpin> AsyncWriter for T {}
+
+
+async fn pipe<R,W>(label: &str, mut reader: R, mut writer: W) -> Result<(), Box<dyn Error + Send + Sync + 'static>>
+where
+  R: AsyncReader,
+  W: AsyncWriter
 {
   let mut buf = [0; 2048];
   // In a loop, read data from the src and write to the dest.
