@@ -1,3 +1,6 @@
+use chrono::offset::Utc;
+use chrono::DateTime;
+use std::time::SystemTime;
 use futures::future::try_join;
 use std::env;
 use std::error::Error;
@@ -10,27 +13,39 @@ extern crate pretty_env_logger;
 async fn pipe<'a, Reader: AsyncRead + Send + Unpin, Writer: AsyncWrite + Send + Unpin>
 (label: &str, mut reader: Reader, mut writer:  Writer) -> Result<(), Box<dyn Error + Send + Sync + 'static>>
 {
-  let mut buf = [0; 1024];
+  let mut buf = [0; 2048];
   // In a loop, read data from the src and write to the dest.
   loop {
     let n = match reader.read(&mut buf).await {
       // socket closed
       Ok(n) if n == 0 => {
         info!("src socket closed");
-        return Ok(())  
+        return Ok(())
       },
       Ok(n) => n,
       Err(e) => {
         eprintln!("failed to read from socket; err = {:?}", e);
-        return Ok(())  
+        return Ok(())
       }
     };
-    info!(target: label, "{} bytes", n);
+    let system_time = SystemTime::now();
+    let datetime: DateTime<Utc> = system_time.into();
+    // println!("{}", datetime.format("%F-%T-%f"));
+
+    info!(target: label, "{} bytes at {}", n, datetime.format("%F-%T-%f"));
+
+
+    // let mut output = String::new();
+    // for i in 0..n {
+    //   let byte = buf[i];
+    //   output.push_str(&format!("{:02x} ", byte));
+    // }
+    // info!(target: label, "{}", output);
 
     // Write the data back
     if let Err(e) = writer.write_all(&buf[0..n]).await {
       eprintln!("failed to write to socket; err = {:?}", e);
-      return Ok(())  
+      return Ok(())
     }
   }
 }
