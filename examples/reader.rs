@@ -5,7 +5,7 @@ use tokio::prelude::*;
 extern crate pretty_env_logger;
 #[macro_use] extern crate log;
 
-async fn read_some<'a, Reader: AsyncRead + Send + Unpin>(mut reader: Reader) -> Result<(), std::io::Error>
+async fn read_some<Reader: AsyncRead + Send + Unpin>(mut reader: Reader) -> Result<(), std::io::Error>
 {
   let mut buf = [0; 2];
   let n = match reader.read(&mut buf).await {

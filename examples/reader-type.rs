@@ -10,7 +10,7 @@ extern crate pretty_env_logger;
 trait Reader: AsyncRead + Send + Unpin { } 
 impl<T: AsyncRead + Send + Unpin> Reader for T {}
 
-async fn read_some<'a, R: Reader>(mut reader: R) -> Result<(), std::io::Error>
+async fn read_some<R: Reader>(mut reader: R) -> Result<(), std::io::Error>
 {
   let mut buf = [0; 2];
   let n = match reader.read(&mut buf).await {
