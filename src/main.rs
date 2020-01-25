@@ -8,7 +8,7 @@ extern crate pretty_env_logger;
 #[macro_use] extern crate log;
 
 async fn pipe<'a, Reader: AsyncRead + Send + Unpin, Writer: AsyncWrite + Send + Unpin>
-(mut reader: Reader, mut writer:  Writer) -> std::result::Result<(), Box<dyn Error>>
+(mut reader: Reader, mut writer:  Writer) -> Result<(), Box<dyn Error>>
 {
   let mut buf = [0; 1024];
   // In a loop, read data from the src and write to the dest.
