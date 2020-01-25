@@ -8,7 +8,7 @@ extern crate pretty_env_logger;
 #[macro_use] extern crate log;
 
 async fn pipe<'a, Reader: AsyncRead + Send + Unpin, Writer: AsyncWrite + Send + Unpin>
-(mut reader: Reader, mut writer:  Writer) -> Result<(), Box<dyn Error + Send + Sync + 'static>>
+(label: &str, mut reader: Reader, mut writer:  Writer) -> Result<(), Box<dyn Error + Send + Sync + 'static>>
 {
   let mut buf = [0; 1024];
   // In a loop, read data from the src and write to the dest.
@@ -25,7 +25,7 @@ async fn pipe<'a, Reader: AsyncRead + Send + Unpin, Writer: AsyncWrite + Send + 
         return Ok(())  
       }
     };
-    info!("read {} bytes", n);
+    info!(target: label, "{} bytes", n);
 
     // Write the data back
     if let Err(e) = writer.write_all(&buf[0..n]).await {
@@ -55,8 +55,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
     dest.set_nodelay(true).expect("dest tcp set_nodelay");
     let ( dest_reader, dest_writer) = dest.split();
 
-    let dest_to_src = pipe(src_reader, dest_writer);
-    let src_to_dest = pipe(dest_reader, src_writer);
+    let dest_to_src = pipe("client", src_reader, dest_writer);
+    let src_to_dest = pipe("server", dest_reader, src_writer);
 
     try_join(dest_to_src, src_to_dest).await.expect("try join");
 
